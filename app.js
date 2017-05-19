@@ -19,14 +19,10 @@ filesService.getSetDefinitions()
   .then(metas => {
     const metasByDir = groupBy(metas, m => m.dir)
     each(metasByDir, (files, dir) => {
-      console.log(`-- :: ${ dir } :: --`)
+      console.log(`-- :: ${dir} :: --`)
 
       each(files, file => {
         console.log(file.title, file.author, file.comments || '')
       })
     })
-
-    // metas.forEach(m => {
-    //   console.log(m.title, m.author, m.dir)
-    // })
   })
