@@ -6,13 +6,15 @@ filesService.getSetDefinitions()
     console.error(err)
   })
   .then(files => {
-    const file = files[0]
     return Promise.all(
-      files.map(f => manifestService.getSongMetadata(f))
+      files.map(f =>
+        manifestService.getSongManifest(f)
+          .then(manifest => manifestService.getSongMetadata(manifest))
+      )
     )
   })
   .then(metas => {
     metas.forEach(m => {
-      console.log(m.title, m.manifest)
+      console.log(m.title, m.author, m.dir)
     })
   })
