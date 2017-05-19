@@ -1,0 +1,24 @@
+{
+  "name": "simfile-summary-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard"
+  },
+  "bin": {
+    "dtx-summarize": "./index.js"
+  },
+  "preferGlobal": true,
+  "keywords": [],
+  "author": "Richard Neil Ilagan <me@richardneililagan.com>",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "7.1.1",
+    "iconv-lite": "0.4.17",
+    "jconv": "0.1.5"
+  },
+  "devDependencies": {
+    "standard": "10.0.2"
+  }
+}
