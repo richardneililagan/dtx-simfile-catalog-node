@@ -1,3 +1,6 @@
+const groupBy = require('lodash/groupBy')
+const each = require('lodash/each')
+
 const filesService = require('./lib/files-service')
 const manifestService = require('./lib/manifest-service')
 
@@ -14,7 +17,16 @@ filesService.getSetDefinitions()
     )
   })
   .then(metas => {
-    metas.forEach(m => {
-      console.log(m.title, m.author, m.dir)
+    const metasByDir = groupBy(metas, m => m.dir)
+    each(metasByDir, (files, dir) => {
+      console.log(`-- :: ${ dir } :: --`)
+
+      each(files, file => {
+        console.log(file.title, file.author, file.comments || '')
+      })
     })
+
+    // metas.forEach(m => {
+    //   console.log(m.title, m.author, m.dir)
+    // })
   })

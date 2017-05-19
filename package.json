@@ -16,7 +16,8 @@
   "dependencies": {
     "glob": "7.1.1",
     "iconv-lite": "0.4.17",
-    "jconv": "0.1.5"
+    "jconv": "0.1.5",
+    "lodash": "4.17.4"
   },
   "devDependencies": {
     "standard": "10.0.2"
