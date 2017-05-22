@@ -1,7 +1,7 @@
 {
-  "name": "simfile-summary-node",
+  "name": "@richardneililagan/dtx-summarize",
   "version": "1.0.0",
-  "description": "",
+  "description": "A script that catalogs DTX files onto an Excel spreadsheet.",
   "main": "index.js",
   "scripts": {
     "test": "standard"
