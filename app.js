@@ -6,6 +6,8 @@ const manifestService = require('./lib/manifest-service')
 const worksheetService = require('./lib/worksheet-service')
 const logger = require('./lib/logging-service')
 
+const appTask = logger.add('Summarizing current directory')
+
 filesService.getSetDefinitions()
   .catch(err => {
     console.error(err)
@@ -29,3 +31,6 @@ filesService.getSetDefinitions()
     })
   })
   .then(metas => worksheetService.exportToWorksheet(metas))
+  .then(_ => {
+    appTask.done().details('Finished.')
+  })
