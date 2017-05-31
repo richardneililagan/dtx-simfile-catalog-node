@@ -1,5 +1,3 @@
-const groupBy = require('lodash/groupBy')
-const each = require('lodash/each')
 const compact = require('lodash/compact')
 
 const filesService = require('./lib/files-service')
