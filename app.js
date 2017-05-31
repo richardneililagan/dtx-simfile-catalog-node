@@ -1,5 +1,6 @@
 const groupBy = require('lodash/groupBy')
 const each = require('lodash/each')
+const compact = require('lodash/compact')
 
 const filesService = require('./lib/files-service')
 const manifestService = require('./lib/manifest-service')
@@ -15,6 +16,7 @@ filesService.getSetDefinitions()
   .then(files => {
     const task = logger.add('Reading manifests')
     let reduce = 0
+    let failures = 0
 
     return Promise.all(
       files.map(f => manifestService
@@ -24,13 +26,20 @@ filesService.getSetDefinitions()
           return manifest
         })
         .then(manifest => manifestService.getSongMetadata(manifest))
+        .catch(_ => {
+          failures = failures + 1
+        })
+        .then(_ => null)
       )
     ).then(metas => {
+      if (failures) {
+        const failureReport = logger.add('Some songs failed to load.')
+        failureReport.fail(`${failures} songs.`)
+      }
+
       task.done()
-      return metas
+      return compact(metas)
     })
   })
   .then(metas => worksheetService.exportToWorksheet(metas))
-  .then(_ => {
-    appTask.done().details('Finished.')
-  })
+  .then(_ => appTask.done().details('Finished.'))
