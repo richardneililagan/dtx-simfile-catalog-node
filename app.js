@@ -27,7 +27,7 @@ filesService.getSetDefinitions()
         .catch(_ => {
           failures = failures + 1
         })
-        .then(_ => null)
+        .then(m => m)
       )
     ).then(metas => {
       if (failures) {
