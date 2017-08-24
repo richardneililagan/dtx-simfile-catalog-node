@@ -1,14 +1,14 @@
 const fs = require('fs')
 const path = require('path')
+const chalk = require('chalk')
 
 const filesService = require('./lib/files-service')
 const manifestService = require('./lib/manifest-service')
 const worksheetService = require('./lib/worksheet-service')
 const logger = require('./lib/logging-service')
 
-const compact = require('lodash/compact')
+const fill = require('lodash/fill')
 const groupBy = require('lodash/groupBy')
-const each = require('lodash/each')
 const map = require('lodash/map')
 
 // :: ---
@@ -36,52 +36,40 @@ filesService.getSongDefinitions()
   .then(files => files.map(file => new SongFile(file)))
   .then(parseSongs)
   .then(metadata => worksheetService.exportToWorksheet(metadata))
+  .then(flushComplete)
   .then(_ => appTask.done().details('Finished.'))
 
 // :: ---
 
 function ensureIntegrity(files) {
-  return files.filter(file => fs.existsSync(file))
+  const task = logger.add('Verifying file integrity')
+  const validFiles = files.filter(file => fs.existsSync(file))
+
+  task.done().details(`${validFiles.length} files valid.`)
+
+  return validFiles
 }
 
 function parseSongs(songfiles) {
+  const task = logger.add('Parsing song files')
+
   const songGroups = groupBy(songfiles, file => file.songDirectory)
   const tasks = map(songGroups, group => manifestService.getSongMetadata(...group))
 
   return Promise.all(tasks)
+    .then(metadata => {
+      task.done().details(`${metadata.length} songs found.`)
+      return metadata
+    })
 }
 
-// filesService.getSetDefinitions()
-//   .catch(err => {
-//     console.error(err)
-//   })
-//   .then(files => {
-//     const task = logger.add('Reading manifests')
-//     let reduce = 0
-//     let failures = 0
+function flushComplete(workbook) {
+  const say = console.log
+  // :: ---
 
-//     return Promise.all(
-//       files.map(f => manifestService
-//         .getSongManifest(f)
-//         .then(manifest => {
-//           task.details(`${++reduce} manifests completed.`)
-//           return manifest
-//         })
-//         .then(manifest => manifestService.getSongMetadata(manifest))
-//         .catch(_ => {
-//           failures = failures + 1
-//         })
-//         .then(m => m)
-//       )
-//     ).then(metas => {
-//       if (failures) {
-//         const failureReport = logger.add('Some songs failed to load.')
-//         failureReport.fail(`${failures} songs.`)
-//       }
+  say('')
+  say(fill(Array(80), '-').join(''))
+  say('')
 
-//       task.done()
-//       return compact(metas)
-//     })
-//   })
-//   .then(metas => worksheetService.exportToWorksheet(metas))
-//   .then(_ => appTask.done().details('Finished.'))
+  say(chalk.magenta('All done!'))
+}
