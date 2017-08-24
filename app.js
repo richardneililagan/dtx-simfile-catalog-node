@@ -71,5 +71,5 @@ function flushComplete(workbook) {
   say(fill(Array(80), '-').join(''))
   say('')
 
-  say(chalk.magenta('All done!'))
+  say(`${chalk.magenta('All done!')} Your workbook is ${chalk.yellow(workbook)}.`)
 }
