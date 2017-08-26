@@ -2,6 +2,13 @@ const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
 
+const pkg = require('./package.json')
+
+const program = require('commander')
+  .version(pkg.version)
+  .option('-p, --parallel [number]', 'Directories to open at the same time', parseInt)
+  .parse(process.argv)
+
 const filesService = require('./lib/files-service')
 const manifestService = require('./lib/manifest-service')
 const worksheetService = require('./lib/worksheet-service')
@@ -13,23 +20,27 @@ const map = require('lodash/map')
 
 // :: ---
 
+const concurrency = program.parallel || 20
+const throat = require('throat')(concurrency)
+
 class SongFile {
-  get directoryGroup() {
+  get directoryGroup () {
     return path.dirname(path.dirname(this.basepath))
   }
 
-  get songDirectory() {
+  get songDirectory () {
     return path.dirname(this.basepath)
   }
 
-  constructor(basepath) {
+  constructor (basepath) {
     this.basepath = basepath
   }
 }
 
 // :: ---
 
-const appTask = logger.add('Summarizing current directory')
+const appTask = logger.add(`Summarizing current directory`)
+  .details(`Concurrency: ${concurrency}`)
 
 filesService.getSongDefinitions()
   .then(ensureIntegrity)
@@ -41,7 +52,7 @@ filesService.getSongDefinitions()
 
 // :: ---
 
-function ensureIntegrity(files) {
+function ensureIntegrity (files) {
   const task = logger.add('Verifying file integrity')
   const validFiles = files.filter(file => fs.existsSync(file))
 
@@ -50,11 +61,11 @@ function ensureIntegrity(files) {
   return validFiles
 }
 
-function parseSongs(songfiles) {
+function parseSongs (songfiles) {
   const task = logger.add('Parsing song files')
 
   const songGroups = groupBy(songfiles, file => file.songDirectory)
-  const tasks = map(songGroups, group => manifestService.getSongMetadata(...group))
+  const tasks = map(songGroups, group => throat(() => manifestService.getSongMetadata(...group)))
 
   return Promise.all(tasks)
     .then(metadata => {
@@ -63,7 +74,7 @@ function parseSongs(songfiles) {
     })
 }
 
-function flushComplete(workbook) {
+function flushComplete (workbook) {
   const say = console.log
   // :: ---
 
